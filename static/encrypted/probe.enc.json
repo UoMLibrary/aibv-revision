@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "alg": "AES-256-GCM",
+  "kdf": "PBKDF2",
+  "hash": "SHA-256",
+  "iterations": 250000,
+  "salt": "pNwd5N/29CuRr6hyQo1GxQ==",
+  "iv": "vzjrV54FViGxWX1w",
+  "data": "/aM1FXVgLnjv0mKtLr4qKbdYxWFAe0beEn/kWp/C/Rom0g=="
+}
