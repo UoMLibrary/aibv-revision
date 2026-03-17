@@ -6,7 +6,7 @@
 
 	import ProgressSummary from '$lib/components/ProgressSummary.svelte';
 	import MarkdownContent from '$lib/components/MarkdownContent.svelte';
-	import BackButton from './BackButton.svelte';
+
 	import { fetchEncryptedJson } from '$lib/crypto/encrypted-json';
 	import { passphrase } from '$lib/stores/unlock';
 
@@ -177,8 +177,6 @@
 </script>
 
 <div class="ksb-check">
-	<BackButton label="Back to home" />
-
 	{#if loading}
 		<div class="card">
 			<p>Loading KSBs…</p>

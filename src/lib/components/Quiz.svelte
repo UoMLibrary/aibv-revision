@@ -4,7 +4,6 @@
 	import { asset } from '$app/paths';
 	import { get } from 'svelte/store';
 
-	import BackButton from './BackButton.svelte';
 	import { fetchEncryptedJson } from '$lib/crypto/encrypted-json';
 	import { passphrase } from '$lib/stores/unlock';
 
@@ -112,8 +111,6 @@
 </script>
 
 <div class="quiz card">
-	<BackButton label="Back to home" />
-
 	{#if loading}
 		<p>Loading quiz…</p>
 	{:else if loadError}

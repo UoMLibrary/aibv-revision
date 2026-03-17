@@ -1,11 +1,51 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
 	import { lock, passphrase, unlockWithProbe } from '$lib/stores/unlock';
+
+	import Quiz from '$lib/components/Quiz.svelte';
+	import KSBCheck from '$lib/components/KSBCheck.svelte';
+
+	type View = 'home' | 'quiz' | 'ksbs';
 
 	let input = '';
 	let busy = false;
 	let error = '';
+	let view: View = 'home';
+
+	function setView(next: View) {
+		view = next;
+
+		if (typeof window === 'undefined') return;
+
+		if (next === 'home') {
+			const cleanUrl = `${window.location.pathname}${window.location.search}`;
+			window.history.replaceState({}, '', cleanUrl);
+		} else {
+			window.location.hash = next;
+		}
+	}
+
+	function syncViewFromHash() {
+		if (typeof window === 'undefined') return;
+
+		const hash = window.location.hash.replace('#', '');
+
+		if (hash === 'quiz' || hash === 'ksbs') {
+			view = hash;
+		} else {
+			view = 'home';
+		}
+	}
+
+	onMount(() => {
+		syncViewFromHash();
+		window.addEventListener('hashchange', syncViewFromHash);
+
+		return () => {
+			window.removeEventListener('hashchange', syncViewFromHash);
+		};
+	});
 
 	async function submitPasscode() {
 		error = '';
@@ -21,55 +61,180 @@
 	}
 </script>
 
-<div class="landing">
-	<div class="card">
-		<h1>AI for Business Value</h1>
-
-		<p class="intro">
-			A focused way to revise and self-assess the Knowledge, Skills and Behaviours required for the
-			apprenticeship.
-		</p>
-
-		{#if !$passphrase}
-			<form class="unlock" on:submit|preventDefault={submitPasscode}>
-				<label for="passcode">Passcode</label>
-				<input
-					id="passcode"
-					type="password"
-					bind:value={input}
-					placeholder="Enter passcode"
-					autocomplete="current-password"
-				/>
-
-				{#if error}
-					<p class="error">{error}</p>
-				{/if}
-
-				<button class="primary" type="submit" disabled={busy}>
-					{busy ? 'Unlocking…' : 'Unlock'}
+{#if $passphrase && view === 'quiz'}
+	<div class="app-shell">
+		<div class="topbar">
+			<div class="nav-group">
+				<button
+					type="button"
+					class:active={view === 'home'}
+					class="nav-button"
+					on:click={() => setView('home')}
+				>
+					Home
 				</button>
-			</form>
-		{:else}
-			<div class="actions">
-				<button class="primary" on:click={() => goto(`ksbs`)}>Revise KSBs</button>
-				<button class="secondary" on:click={() => goto('quiz')}>AIBV quiz</button>
+				<button
+					type="button"
+					class:active={view === 'ksbs'}
+					class="nav-button"
+					on:click={() => setView('ksbs')}
+				>
+					KSBs
+				</button>
+				<button
+					type="button"
+					class:active={view === 'quiz'}
+					class="nav-button"
+					on:click={() => setView('quiz')}
+				>
+					Quiz
+				</button>
 			</div>
 
-			<div class="minor-actions">
-				<button class="text-button" on:click={lock}>Lock</button>
-			</div>
-		{/if}
+			<button type="button" class="text-button" on:click={lock}>Lock</button>
+		</div>
+
+		<Quiz />
 	</div>
-</div>
+{:else if $passphrase && view === 'ksbs'}
+	<div class="app-shell">
+		<div class="topbar">
+			<div class="nav-group">
+				<button
+					type="button"
+					class:active={view === 'home'}
+					class="nav-button"
+					on:click={() => setView('home')}
+				>
+					Home
+				</button>
+				<button
+					type="button"
+					class:active={view === 'ksbs'}
+					class="nav-button"
+					on:click={() => setView('ksbs')}
+				>
+					KSBs
+				</button>
+				<button
+					type="button"
+					class:active={view === 'quiz'}
+					class="nav-button"
+					on:click={() => setView('quiz')}
+				>
+					Quiz
+				</button>
+			</div>
+
+			<button type="button" class="text-button" on:click={lock}>Lock</button>
+		</div>
+
+		<KSBCheck />
+	</div>
+{:else}
+	<div class="landing">
+		<div class="card">
+			<h1>AI for Business Value</h1>
+
+			<p class="intro">
+				A focused way to revise and self-assess the Knowledge, Skills and Behaviours required for
+				the apprenticeship.
+			</p>
+
+			{#if !$passphrase}
+				<form class="unlock" on:submit|preventDefault={submitPasscode}>
+					<label for="passcode">Passcode</label>
+					<input
+						id="passcode"
+						type="password"
+						bind:value={input}
+						placeholder="Enter passcode"
+						autocomplete="current-password"
+					/>
+
+					{#if error}
+						<p class="error">{error}</p>
+					{/if}
+
+					<button class="primary" type="submit" disabled={busy}>
+						{busy ? 'Unlocking…' : 'Unlock'}
+					</button>
+				</form>
+			{:else}
+				<div class="actions">
+					<button class="primary" type="button" on:click={() => setView('ksbs')}>Revise KSBs</button
+					>
+					<button class="secondary" type="button" on:click={() => setView('quiz')}>AIBV quiz</button
+					>
+				</div>
+
+				<div class="minor-actions">
+					<button class="text-button" type="button" on:click={lock}>Lock</button>
+				</div>
+			{/if}
+		</div>
+	</div>
+{/if}
 
 <style>
+	:global(body) {
+		margin: 0;
+		background: #f9fafb;
+		font-family: system-ui, sans-serif;
+	}
+
+	.app-shell {
+		min-height: 100vh;
+		padding: 1rem;
+		box-sizing: border-box;
+	}
+
+	.topbar {
+		max-width: 980px;
+		margin: 0 auto 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.nav-group {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.nav-button {
+		background: white;
+		color: #111827;
+		border: 1px solid #d1d5db;
+		border-radius: 999px;
+		padding: 0.55rem 0.95rem;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+
+	.nav-button:hover {
+		background: #f3f4f6;
+	}
+
+	.nav-button.active {
+		background: #111827;
+		color: white;
+		border-color: #111827;
+	}
+
 	.landing {
 		min-height: calc(100vh - 2rem);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 1rem;
-		font-family: system-ui, sans-serif;
 		background: #f9fafb;
 	}
 
@@ -81,6 +246,7 @@
 		max-width: 520px;
 		width: 100%;
 		text-align: center;
+		box-sizing: border-box;
 	}
 
 	h1 {
@@ -114,6 +280,7 @@
 		border-radius: 10px;
 		padding: 0.7rem 0.85rem;
 		font-size: 0.95rem;
+		box-sizing: border-box;
 	}
 
 	.error {
@@ -181,6 +348,21 @@
 		background: #f3f4f6;
 	}
 
+	@media (max-width: 640px) {
+		.topbar {
+			align-items: stretch;
+		}
+
+		.nav-group {
+			width: 100%;
+		}
+
+		.nav-button {
+			flex: 1 1 auto;
+			text-align: center;
+		}
+	}
+
 	@media (max-width: 480px) {
 		.card {
 			padding: 1.75rem 1.5rem;
@@ -194,7 +376,7 @@
 			flex-direction: column;
 		}
 
-		button {
+		.actions button {
 			width: 100%;
 		}
 
