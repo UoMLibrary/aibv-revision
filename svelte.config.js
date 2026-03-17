@@ -6,7 +6,7 @@ const config = {
 		adapter: adapter({
 			pages: 'docs',
 			assets: 'docs',
-			fallback: 'index.html' // important
+			fallback: '404.html'
 		}),
 		paths: {
 			base: '/aibv-revision'

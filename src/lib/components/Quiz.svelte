@@ -85,12 +85,18 @@
 
 		if (correct) {
 			score++;
-		} else if (suddenDeath) {
-			finished = true;
 		}
 	}
 
 	function nextQuestion() {
+		const q = quizQuestions[currentIndex];
+		const gotItWrong = selected !== q.answer;
+
+		if (suddenDeath && gotItWrong) {
+			finished = true;
+			return;
+		}
+
 		showFeedback = false;
 		selected = null;
 		currentIndex++;
@@ -210,7 +216,13 @@
 
 			{#if !finished}
 				<div class="quiz-actions">
-					<button on:click={nextQuestion}>Next question</button>
+					<button on:click={nextQuestion}>
+						{#if suddenDeath && selected !== quizQuestions[currentIndex].answer}
+							Finish quiz
+						{:else}
+							Next question
+						{/if}
+					</button>
 				</div>
 			{/if}
 		{/if}
