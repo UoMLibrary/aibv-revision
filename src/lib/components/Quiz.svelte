@@ -57,9 +57,14 @@
 		return [...array].sort(() => Math.random() - 0.5);
 	}
 
-	function startQuiz(count: number | 'sudden') {
+	function startQuiz(count: number | 'sudden' | 'all') {
 		suddenDeath = count === 'sudden';
-		quizQuestions = suddenDeath ? shuffle(allQuestions) : shuffle(allQuestions).slice(0, count);
+
+		if (count === 'sudden' || count === 'all') {
+			quizQuestions = shuffle(allQuestions);
+		} else {
+			quizQuestions = shuffle(allQuestions).slice(0, count);
+		}
 
 		started = true;
 		currentIndex = 0;
@@ -114,6 +119,9 @@
 			<button on:click={() => startQuiz(10)}>10 questions</button>
 			<button on:click={() => startQuiz(25)}>25 questions</button>
 			<button on:click={() => startQuiz(50)}>50 questions</button>
+			<button on:click={() => startQuiz('all')}>
+				All questions ({allQuestions.length})
+			</button>
 			<button class="danger" on:click={() => startQuiz('sudden')}>Sudden death</button>
 		</div>
 	{:else if finished}
@@ -220,7 +228,6 @@
 		font-family: system-ui, sans-serif;
 	}
 
-	/* Card already matches KSBCheck */
 	.card {
 		background: white;
 		border: 1px solid #e5e7eb;
@@ -228,21 +235,18 @@
 		padding: 1.5rem;
 	}
 
-	/* Headings */
 	h2,
 	h3 {
 		margin-bottom: 0.75rem;
 		line-height: 1.3;
 	}
 
-	/* Meta info (module/unit) */
 	.meta {
 		font-size: 0.8rem;
 		color: #6b7280;
 		margin-bottom: 0.5rem;
 	}
 
-	/* Question text */
 	.question {
 		font-size: 1.05rem;
 		font-weight: 500;
@@ -250,7 +254,6 @@
 		line-height: 1.655;
 	}
 
-	/* Start buttons */
 	.buttons {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -287,7 +290,6 @@
 		background: #991b1b;
 	}
 
-	/* Options */
 	.options {
 		list-style: none;
 		padding: 0;
@@ -317,20 +319,18 @@
 		background: #f3f4f6;
 	}
 
-	/* Selected answer */
 	.selected {
 		border-color: #9ca3af;
 	}
 
-	/* Correct / wrong states (same palette as mastery buttons) */
 	.correct {
-		background: #dcfce7; /* green-100 */
+		background: #dcfce7;
 		border-color: #22c55e;
 		color: #14532d;
 	}
 
 	.wrong {
-		background: #fee2e2; /* red-100 */
+		background: #fee2e2;
 		border-color: #ef4444;
 		color: #7f1d1d;
 	}
@@ -345,7 +345,7 @@
 
 	.score {
 		font-size: 0.85rem;
-		color: #6b7280; /* same muted grey as .meta */
+		color: #6b7280;
 		white-space: nowrap;
 	}
 
@@ -362,22 +362,20 @@
 		font-weight: 600;
 	}
 
-	/* Correct answer */
 	.answer-feedback.correct {
-		background: #dcfce7; /* green-100 */
-		border: 1px solid #22c55e; /* green-500 */
-		color: #14532d; /* green-900 */
+		background: #dcfce7;
+		border: 1px solid #22c55e;
+		color: #14532d;
 	}
 
 	.answer-feedback.correct h4 {
 		color: #166534;
 	}
 
-	/* Wrong answer */
 	.answer-feedback.wrong {
-		background: #fee2e2; /* red-100 */
-		border: 1px solid #ef4444; /* red-500 */
-		color: #7f1d1d; /* red-900 */
+		background: #fee2e2;
+		border: 1px solid #ef4444;
+		color: #7f1d1d;
 	}
 
 	.answer-feedback.wrong h4 {
@@ -389,9 +387,11 @@
 		justify-content: flex-end;
 		margin-top: 1.25rem;
 	}
+
 	.quiz-actions button {
 		background: #111827;
 	}
+
 	.quiz-finished {
 		text-align: center;
 	}
